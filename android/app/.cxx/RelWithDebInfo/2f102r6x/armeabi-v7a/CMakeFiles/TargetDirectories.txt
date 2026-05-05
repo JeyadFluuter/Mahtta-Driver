@@ -1,0 +1,2 @@
+/Users/moadbenyousef/Flutter Projects/piaggio_driver/android/app/.cxx/RelWithDebInfo/2f102r6x/armeabi-v7a/CMakeFiles/edit_cache.dir
+/Users/moadbenyousef/Flutter Projects/piaggio_driver/android/app/.cxx/RelWithDebInfo/2f102r6x/armeabi-v7a/CMakeFiles/rebuild_cache.dir
