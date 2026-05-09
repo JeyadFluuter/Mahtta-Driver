@@ -1,0 +1,5 @@
+package ly.jeyad.MahttaDriver
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity: FlutterActivity()

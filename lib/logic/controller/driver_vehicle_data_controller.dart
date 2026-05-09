@@ -172,6 +172,12 @@ class DriverVehicleDataController extends GetxController {
       debugPrint("- Inside: ${base64VehicleInside.length}");
       debugPrint("- Trunk: ${base64VehicleTrunk.length}");
 
+      // Parse capacity to integer
+      String parsedCapacity = capacityCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
+      if (parsedCapacity.isEmpty) {
+        parsedCapacity = "1"; // Fallback to 1 if empty or no numbers
+      }
+
       final result = await _driverVehcileDataServices.driverVehcileData(
         vehicle_type: selectedVehicleId.value.toString(),
         plate_number: plateNumberCtrl.text,
@@ -180,7 +186,7 @@ class DriverVehicleDataController extends GetxController {
         vehicle_brochure: vehicleBrandCtrl.text,
         vehicle_color: vehicleColorCtrl.text,
         model: vehicleModelCtrl.text,
-        capacity: capacityCtrl.text,
+        capacity: parsedCapacity,
         insurance_document: base64DocumentImage,
         vehicle_front_image: base64VehicleFront,
         vehicle_back_image: base64VehicleBack,
@@ -193,12 +199,26 @@ class DriverVehicleDataController extends GetxController {
       if (result != null) {
         driverVehicleDataModel.value = result as DriverVehicleDataModel?;
         await meCtrl.refreshMe();
-        Get.snackbar("نجاح", "تم إضافة بيانات المركبة بنجاح");
-        Get.offAll(() => HomeScreen());
+        Get.defaultDialog(
+          title: "نجاح",
+          middleText: "تم إضافة بيانات المركبة بنجاح",
+          textConfirm: "موافق",
+          confirmTextColor: Colors.white,
+          onConfirm: () {
+            Navigator.pop(Get.context!);
+            Get.offAll(() => HomeScreen());
+          },
+        );
       } else {
         errorMessage.value = 'فشل في إضافة بيانات المركبة. تحقق من البيانات.';
-        Get.snackbar(
-            "إضافة بيانات المركبة", "هناك خطأ في عملية إضافة البيانات");
+        Get.defaultDialog(
+          title: "خطأ",
+          middleText: "هناك خطأ في عملية إضافة البيانات",
+          textConfirm: "حسناً",
+          confirmTextColor: Colors.white,
+          buttonColor: Colors.red,
+          onConfirm: () => Navigator.pop(Get.context!),
+        );
       }
     } catch (e) {
       errorMessage.value = 'حدث خطأ: $e';

@@ -33,7 +33,6 @@ class SetLocationController extends GetxController {
       debugPrint(
           "✅ saved lat=${box.read('working_lat')}, lng=${box.read('working_lng')}, rad=${box.read('working_radius')}");
 
-      Get.snackbar('تحديد الموقع', 'تم الإرسال بنجاح');
       return true;
     } else {
       Get.snackbar('خطأ', 'تعذّر إرسال الموقع');

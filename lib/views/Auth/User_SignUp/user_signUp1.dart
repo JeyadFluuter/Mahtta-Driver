@@ -107,9 +107,6 @@ class UserSignup1 extends StatelessWidget {
                     ctrl: controller.emailCtrl,
                     icon: Icons.email_outlined,
                     validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "يرجى إدخال البريد الإلكتروني";
-                  }
                   return null;
                 }),
                 const SizedBox(height: AppDimensions.paddingMedium),

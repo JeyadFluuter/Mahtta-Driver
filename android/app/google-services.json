@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "310709959570",
-    "project_id": "piaggio-776da",
-    "storage_bucket": "piaggio-776da.firebasestorage.app"
+    "project_number": "579505998311",
+    "project_id": "portixapp",
+    "storage_bucket": "portixapp.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:310709959570:android:4cd5530c2ec0ed44665f4b",
+        "mobilesdk_app_id": "1:579505998311:android:30b6a9967d1753a3175542",
         "android_client_info": {
-          "package_name": "com.example.biadgo"
+          "package_name": "com.Protix.customer"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDNyToiNwYjvVoFGTU9zbLqJxdClgcVjMc"
+          "current_key": "AIzaSyAOcZtEj1SVtCPhUpcNnzkv09PFp1oMbWw"
         }
       ],
       "services": {
@@ -26,15 +26,15 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:310709959570:android:2f91a433b7ce90b0665f4b",
+        "mobilesdk_app_id": "1:579505998311:android:b090a4d7db2c1c61175542",
         "android_client_info": {
-          "package_name": "com.example.piaggio_driver"
+          "package_name": "ly.jeyad.MahttaDriver"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDNyToiNwYjvVoFGTU9zbLqJxdClgcVjMc"
+          "current_key": "AIzaSyAOcZtEj1SVtCPhUpcNnzkv09PFp1oMbWw"
         }
       ],
       "services": {

@@ -5,6 +5,7 @@ import 'package:piaggio_driver/services/add_shipment_type_services.dart';
 
 class AddShipmentTypeController extends GetxController {
   final _service = AddShipmentTypeServices();
+  var isLoading = false.obs;
 
   Future<void> send(List<int> ids) async {
     if (ids.isEmpty) {
@@ -12,18 +13,23 @@ class AddShipmentTypeController extends GetxController {
       return;
     }
 
-    final ok = await _service.updateShipmentTypes(ids);
-    if (ok) {
-      Get.snackbar('نجاح', 'تمّ تحديث أنواع البضاعة',
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 3));
-      Get.offAllNamed(AppRoutes.homescreen);
-    } else {
-      Get.snackbar('خطأ', 'تعذّر تحديث أنواع البضاعة',
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 4));
+    try {
+      isLoading(true);
+      final ok = await _service.updateShipmentTypes(ids);
+      if (ok) {
+        Get.snackbar('نجاح', 'تمّ تحديث أنواع البضاعة',
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+            duration: const Duration(seconds: 3));
+        Get.offAllNamed(AppRoutes.homescreen);
+      } else {
+        Get.snackbar('خطأ', 'تعذّر تحديث أنواع البضاعة',
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+            duration: const Duration(seconds: 4));
+      }
+    } finally {
+      isLoading(false);
     }
   }
 }

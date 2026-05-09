@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:piaggio_driver/constants/app_dimensions.dart';
 import 'package:piaggio_driver/constants/app_theme.dart';
 import 'package:piaggio_driver/logic/controller/auth_controller.dart';
+import 'package:piaggio_driver/widgets/searchable_dropdown.dart';
 
 class UserSignup2 extends StatelessWidget {
   UserSignup2({super.key});
@@ -37,12 +38,17 @@ class UserSignup2 extends StatelessWidget {
                   },
                 ),
                 const SizedBox(height: AppDimensions.paddingMedium),
-                _buildTextField(
-                  "نوع الرخصة",
-                  ctrl: controller.licenseTypeCtrl,
+                SearchableDropdown<String>(
+                  hint: "نوع الرخصة",
                   icon: Icons.category_outlined,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
+                  value: controller.licenseTypeCtrl.text.isNotEmpty ? controller.licenseTypeCtrl.text : null,
+                  items: const ['أولى', 'ثانية', 'ثالثة', 'رابعة'],
+                  itemAsString: (val) => val,
+                  onChanged: (val) {
+                    if (val != null) controller.licenseTypeCtrl.text = val;
+                  },
+                  validator: (val) {
+                    if (val == null || val.isEmpty) {
                       return "يرجى إدخال نوع الرخصة";
                     }
                     return null;
@@ -60,6 +66,23 @@ class UserSignup2 extends StatelessWidget {
                       initialDate: DateTime.now(),
                       firstDate: DateTime(2000),
                       lastDate: DateTime(2100),
+                      builder: (context, child) {
+                        return Theme(
+                          data: Theme.of(context).copyWith(
+                            colorScheme: const ColorScheme.light(
+                              primary: AppThemes.primaryOrange,
+                              onPrimary: Colors.white,
+                              onSurface: AppThemes.primaryNavy,
+                            ),
+                            textButtonTheme: TextButtonThemeData(
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppThemes.primaryOrange,
+                              ),
+                            ),
+                          ),
+                          child: child!,
+                        );
+                      },
                     );
 
                     if (pickedDate != null) {
@@ -98,6 +121,23 @@ class UserSignup2 extends StatelessWidget {
                       initialDate: DateTime.now(),
                       firstDate: DateTime(2000),
                       lastDate: DateTime(2100),
+                      builder: (context, child) {
+                        return Theme(
+                          data: Theme.of(context).copyWith(
+                            colorScheme: const ColorScheme.light(
+                              primary: AppThemes.primaryOrange,
+                              onPrimary: Colors.white,
+                              onSurface: AppThemes.primaryNavy,
+                            ),
+                            textButtonTheme: TextButtonThemeData(
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppThemes.primaryOrange,
+                              ),
+                            ),
+                          ),
+                          child: child!,
+                        );
+                      },
                     );
 
                     if (pickedDate != null) {
@@ -136,7 +176,7 @@ class UserSignup2 extends StatelessWidget {
       readOnly: readOnly,
       onTap: onTap,
       textAlign: TextAlign.right,
-      keyboardType: (hint.contains("رقم") && !hint.contains("جواز"))
+      keyboardType: (hint.contains("رقم") && !hint.contains("جواز") && !hint.contains("الرخصة"))
           ? TextInputType.number
           : TextInputType.text,
       decoration: InputDecoration(

@@ -202,12 +202,27 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
 ]
 ''';
 
+  bool _isMapCreated = false;
+
   @override
   void initState() {
     super.initState();
     _loadIcons();
     if (widget.showRoute && widget.pickup != null && widget.dropoff != null) {
       _fetchRoute();
+    }
+    _initLocation();
+  }
+
+  Future<void> _initLocation() async {
+    final loc = await locCtrl.ensureLastLocation();
+    if (loc != null && mounted) {
+      if (widget.pickup == null && widget.dropoff == null && _mapController != null) {
+        _mapController!.animateCamera(CameraUpdate.newLatLngZoom(
+          LatLng(loc.latitude!, loc.longitude!), 14.0
+        ));
+      }
+      setState(() {});
     }
   }
 
@@ -351,6 +366,11 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
                 _mapController!.setMapStyle(_darkMapStyle);
               }
               _fitBounds();
+              if (mounted) {
+                setState(() {
+                  _isMapCreated = true;
+                });
+              }
             },
             initialCameraPosition: CameraPosition(
               target: widget.pickup ?? LatLng(lat, lng),
@@ -370,6 +390,34 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
             myLocationButtonEnabled: false,
             mapToolbarEnabled: false,
           ),
+          if (!_isMapCreated)
+            Container(
+              color: isDarkMode ? AppThemes.primaryNavy : Colors.white,
+              child: const Center(
+                child: CircularProgressIndicator(
+                  color: AppThemes.primaryOrange,
+                ),
+              ),
+            ),
+          Positioned(
+            bottom: widget.showEditZone ? 110 + widget.bottomPadding : 30 + widget.bottomPadding,
+            right: 16,
+            child: FloatingActionButton(
+              heroTag: 'focus_driver_loc',
+              mini: true,
+              backgroundColor: Colors.white,
+              onPressed: () {
+                final currentLat = locCtrl.currentLoc?.latitude;
+                final currentLng = locCtrl.currentLoc?.longitude;
+                if (currentLat != null && currentLng != null && _mapController != null) {
+                  _mapController!.animateCamera(
+                    CameraUpdate.newLatLngZoom(LatLng(currentLat, currentLng), 16.0),
+                  );
+                }
+              },
+              child: const Icon(Icons.my_location, color: AppThemes.primaryNavy, size: 20),
+            ),
+          ),
           if (widget.showEditZone)
             AnimatedPositioned(
               duration: const Duration(milliseconds: 300),
@@ -377,6 +425,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
               bottom: 60 + widget.bottomPadding,
               right: 16,
               child: FloatingActionButton(
+                heroTag: 'edit_zone_loc',
                 mini: true,
                 backgroundColor: AppThemes.primaryOrange,
                 onPressed: () => Get.toNamed(AppRoute.selectZone),

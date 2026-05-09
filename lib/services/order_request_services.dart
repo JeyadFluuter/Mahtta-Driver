@@ -165,7 +165,9 @@ class PusherService extends GetxService with WidgetsBindingObserver {
       }
     } catch (_) {}
     try {
-      await _pusher.disconnect();
+      if (_ready) {
+        await _pusher.disconnect();
+      }
     } catch (_) {}
 
     _ready = false;
@@ -180,7 +182,9 @@ class PusherService extends GetxService with WidgetsBindingObserver {
       if (_currentChannel != null) {
         await _pusher.unsubscribe(channelName: _currentChannel!);
       }
-      await _pusher.disconnect();
+      if (_ready) {
+        await _pusher.disconnect();
+      }
     } catch (e) {
       log('❌ Error during disconnect: $e');
     } finally {

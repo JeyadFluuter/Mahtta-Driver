@@ -1,6 +1,7 @@
 import 'package:piaggio_driver/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:piaggio_driver/constants/app_dimensions.dart';
 import 'package:piaggio_driver/logic/controller/add_shipment_type_controller.dart';
 import 'package:piaggio_driver/logic/controller/my_shipment_type_controller.dart';
@@ -37,10 +38,7 @@ class MyShipmentTypeScreen extends StatelessWidget {
             padding: const EdgeInsets.all(AppDimensions.paddingMedium),
             child: Obx(() {
               if (shipmentTypeCtrl.isLoading.value) {
-                return Center(
-                    child: CircularProgressIndicator(
-                  color: AppThemes.primaryNavy,
-                ));
+                return _buildSkeleton();
               }
               if (shipmentTypeCtrl.error.isNotEmpty) {
                 return Center(child: Text(shipmentTypeCtrl.error.value));
@@ -73,9 +71,19 @@ class MyShipmentTypeScreen extends StatelessWidget {
                         minimumSize: const Size(
                             double.infinity, AppDimensions.buttonHeight),
                       ),
-                      onPressed: () =>
-                          addCtrl.send(shipmentTypeCtrl.selectedIds),
-                      child: const Text('حفظ'),
+                      onPressed: addCtrl.isLoading.value
+                          ? null
+                          : () => addCtrl.send(shipmentTypeCtrl.selectedIds),
+                      child: addCtrl.isLoading.value
+                          ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text('حفظ', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],
@@ -83,6 +91,32 @@ class MyShipmentTypeScreen extends StatelessWidget {
             }),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSkeleton() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: 9,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          mainAxisExtent: 110,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+        ),
+        itemBuilder: (_, __) {
+          return Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+            ),
+          );
+        },
       ),
     );
   }

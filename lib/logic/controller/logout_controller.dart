@@ -53,21 +53,27 @@ class LogOutController extends GetxController {
           response.statusCode == 200 ||
           response.statusCode == 401 ||
           response.statusCode == 419;
-      if (okStatus) {
-        Get.snackbar("تسجيل الخروج", "تم تسجيل الخروج بنجاح",
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
-            icon: const Icon(Icons.check, color: Colors.white),
-            colorText: Colors.white);
-      } else {
-        Get.snackbar("تنبيه",
-            "تم مسح الجلسة محليًا لكن السيرفر رجّع ${response.statusCode}",
-            backgroundColor: Colors.orange,
-            duration: const Duration(seconds: 2),
-            icon: const Icon(Icons.warning, color: Colors.white),
-            colorText: Colors.white);
-      }
+          
       Get.offAll(() => const WelcomeScreen());
+
+      if (okStatus) {
+        Future.delayed(const Duration(milliseconds: 300), () {
+          Get.snackbar("تسجيل الخروج", "تم تسجيل الخروج بنجاح",
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+              icon: const Icon(Icons.check, color: Colors.white),
+              colorText: Colors.white);
+        });
+      } else {
+        Future.delayed(const Duration(milliseconds: 300), () {
+          Get.snackbar("تنبيه",
+              "تم مسح الجلسة محليًا لكن السيرفر رجّع ${response!.statusCode}",
+              backgroundColor: Colors.orange,
+              duration: const Duration(seconds: 2),
+              icon: const Icon(Icons.warning, color: Colors.white),
+              colorText: Colors.white);
+        });
+      }
     } catch (e) {
       Get.snackbar("خطأ", "حدث خطأ أثناء تسجيل الخروج: $e",
           backgroundColor: Colors.red,

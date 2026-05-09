@@ -5,6 +5,7 @@ import 'package:piaggio_driver/constants/app_theme.dart';
 import 'package:piaggio_driver/logic/controller/all_shipmetn_types_signUp_controller.dart';
 import 'package:piaggio_driver/logic/controller/auth_controller.dart';
 import 'package:piaggio_driver/model/all_shipment_types_signUp_model.dart';
+import 'package:shimmer/shimmer.dart';
 
 class UserSignup4 extends StatelessWidget {
   UserSignup4({super.key});
@@ -150,6 +151,30 @@ class UserSignup4 extends StatelessWidget {
                 const SizedBox(height: 16),
                 Expanded(
                   child: Obx(() {
+                    if (ctrl.isLoading.value) {
+                      return GridView.builder(
+                        controller: scrollCtrl,
+                        padding: const EdgeInsets.only(bottom: 16),
+                        itemCount: 6,
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          mainAxisExtent: 115,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                        ),
+                        itemBuilder: (_, i) => Shimmer.fromColors(
+                          baseColor: Colors.grey.shade300,
+                          highlightColor: Colors.grey.shade100,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+
                     final allItems = ctrl.types;
                     return GridView.builder(
                       controller: scrollCtrl,
@@ -225,7 +250,7 @@ class UserSignup4 extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
                       ),
-                      onPressed: () => Get.back(),
+                      onPressed: () => Navigator.pop(context),
                       child: const Text('تم الموافقة',
                           style: TextStyle(
                               fontSize: 16,

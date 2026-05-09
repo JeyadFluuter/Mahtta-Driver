@@ -49,19 +49,20 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDNyToiNwYjvVoFGTU9zbLqJxdClgcVjMc',
-    appId: '1:310709959570:android:2f91a433b7ce90b0665f4b',
-    messagingSenderId: '310709959570',
-    projectId: 'piaggio-776da',
-    storageBucket: 'piaggio-776da.firebasestorage.app',
+    apiKey: 'AIzaSyAOcZtEj1SVtCPhUpcNnzkv09PFp1oMbWw',
+    appId: '1:579505998311:android:b090a4d7db2c1c61175542',
+    messagingSenderId: '579505998311',
+    projectId: 'portixapp',
+    storageBucket: 'portixapp.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBNizwvN5vpOyRAOqow1A9DzFc-AAE7dGM',
-    appId: '1:310709959570:ios:83b38cd8afdbf770665f4b',
-    messagingSenderId: '310709959570',
-    projectId: 'piaggio-776da',
-    storageBucket: 'piaggio-776da.firebasestorage.app',
-    iosBundleId: 'com.example.piaggioDriver',
+    apiKey: 'AIzaSyC-xXyX1eczDX48wRDywCVIhwp4716eN8w',
+    appId: '1:579505998311:ios:b35760e0a9329c9c175542',
+    messagingSenderId: '579505998311',
+    projectId: 'portixapp',
+    storageBucket: 'portixapp.firebasestorage.app',
+    iosBundleId: 'ly.jeyad.MahttaDriver',
   );
+
 }

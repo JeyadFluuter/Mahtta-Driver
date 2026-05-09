@@ -5,9 +5,12 @@ import 'package:get_storage/get_storage.dart';
 import 'package:get/get.dart';
 import 'package:piaggio_driver/constants/app_dimensions.dart';
 import 'package:piaggio_driver/logic/controller/set_Location_controller.dart';
+import 'package:piaggio_driver/logic/controller/location_controller.dart';
 import 'package:piaggio_driver/views/home_screen.dart';
 import 'package:piaggio_driver/widgets/button.dart';
-import 'package:piaggio_driver/constants/app_theme.dart';
+import 'dart:ui' as ui;
+import 'package:flutter/services.dart';
+
 class SelectZoneMap extends StatefulWidget {
   const SelectZoneMap({super.key});
 
@@ -34,6 +37,8 @@ class _SelectZoneMapState extends State<SelectZoneMap> {
   double get currentRadius => allowedRadiuses[_radiusIndex.toInt()];
   final SetLocationController _locationController =
       Get.put(SetLocationController());
+  final LocationController locCtrl = Get.put(LocationController());
+  BitmapDescriptor? _carIcon;
 
   // Dark style for Google Maps
   final String _darkMapStyle = '''
@@ -203,7 +208,37 @@ class _SelectZoneMapState extends State<SelectZoneMap> {
   @override
   void initState() {
     super.initState();
+    _loadIcons();
     _loadSavedZone();
+    _initLocation();
+  }
+
+  Future<void> _initLocation() async {
+    final loc = await locCtrl.ensureLastLocation();
+    if (loc != null && mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> _loadIcons() async {
+    try {
+      final ByteData data = await rootBundle.load('assets/images/car.png');
+      final ui.Codec codec = await ui.instantiateImageCodec(
+        data.buffer.asUint8List(),
+        targetWidth: 130,
+      );
+      final ui.FrameInfo fi = await codec.getNextFrame();
+      final ByteData? byteData = await fi.image.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
+
+      if (byteData != null) {
+        _carIcon = BitmapDescriptor.fromBytes(byteData.buffer.asUint8List());
+        if (mounted) setState(() {});
+      }
+    } catch (e) {
+      debugPrint("❌ Error loading car icon: $e");
+    }
   }
 
   void _loadSavedZone() {
@@ -230,6 +265,7 @@ class _SelectZoneMapState extends State<SelectZoneMap> {
   }
 
   bool _isLoading = false;
+  bool _isMapCreated = false;
 
   @override
   Widget build(BuildContext context) {
@@ -266,6 +302,11 @@ class _SelectZoneMapState extends State<SelectZoneMap> {
                   }
                   _mapController!
                       .animateCamera(CameraUpdate.newLatLng(_currentCenter));
+                  if (mounted) {
+                    setState(() {
+                      _isMapCreated = true;
+                    });
+                  }
                 },
                 initialCameraPosition: CameraPosition(
                   target: _currentCenter,
@@ -291,6 +332,18 @@ class _SelectZoneMapState extends State<SelectZoneMap> {
                     icon: BitmapDescriptor.defaultMarkerWithHue(
                         BitmapDescriptor.hueAzure),
                   ),
+                  if (locCtrl.currentLoc?.latitude != null && locCtrl.currentLoc?.longitude != null)
+                    Marker(
+                      markerId: const MarkerId('driver'),
+                      position: LatLng(
+                        locCtrl.currentLoc!.latitude!.toDouble(),
+                        locCtrl.currentLoc!.longitude!.toDouble(),
+                      ),
+                      icon: _carIcon ??
+                          BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+                      rotation: locCtrl.currentLoc?.heading?.toDouble() ?? 0.0,
+                      anchor: const Offset(0.5, 0.5),
+                    ),
                 },
                 cameraTargetBounds: CameraTargetBounds(
                   LatLngBounds(
@@ -298,10 +351,19 @@ class _SelectZoneMapState extends State<SelectZoneMap> {
                     northeast: const LatLng(33.10, 14.60),
                   ),
                 ),
-                myLocationEnabled: true,
+                myLocationEnabled: false,
                 myLocationButtonEnabled: false,
                 zoomControlsEnabled: false,
               ),
+              if (!_isMapCreated)
+                Container(
+                  color: isDarkMode ? AppThemes.primaryNavy : Colors.white,
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      color: AppThemes.primaryOrange,
+                    ),
+                  ),
+                ),
               Positioned(
                 top: 20,
                 right: 16,
@@ -317,6 +379,22 @@ class _SelectZoneMapState extends State<SelectZoneMap> {
                       icon: Icons.remove,
                       onPressed: () =>
                           _mapController?.animateCamera(CameraUpdate.zoomOut()),
+                    ),
+                    const SizedBox(height: 12),
+                    FloatingActionButton(
+                      heroTag: 'focus_driver_choose_zone',
+                      mini: true,
+                      backgroundColor: Colors.white,
+                      onPressed: () {
+                        final currentLat = locCtrl.currentLoc?.latitude;
+                        final currentLng = locCtrl.currentLoc?.longitude;
+                        if (currentLat != null && currentLng != null && _mapController != null) {
+                          _mapController!.animateCamera(
+                            CameraUpdate.newLatLngZoom(LatLng(currentLat, currentLng), 16.0),
+                          );
+                        }
+                      },
+                      child: const Icon(Icons.my_location, color: AppThemes.primaryNavy, size: 20),
                     ),
                   ],
                 ),
@@ -409,11 +487,6 @@ class _SelectZoneMapState extends State<SelectZoneMap> {
                           );
 
                           if (ok == true) {
-                            Get.back(result: {
-                              'lat': _currentCenter.latitude,
-                              'lng': _currentCenter.longitude,
-                              'radius': currentRadius,
-                            });
                             Get.offAll(() => HomeScreen());
                           }
                         } finally {

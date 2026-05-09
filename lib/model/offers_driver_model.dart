@@ -9,6 +9,8 @@ class OffersDriverModel {
   final String startsAt;
   final String endsAt;
 
+  final String link;
+
   OffersDriverModel({
     required this.id,
     required this.title,
@@ -16,6 +18,7 @@ class OffersDriverModel {
     required this.image,
     required this.startsAt,
     required this.endsAt,
+    required this.link,
   });
 
   factory OffersDriverModel.fromMap(Map<String, dynamic> json) {
@@ -26,6 +29,7 @@ class OffersDriverModel {
       image: json['image'] != null ? "$imageUrl${json['image']}" : '',
       startsAt: json['starts_at'] ?? '',
       endsAt: json['ends_at'] ?? '',
+      link: json['link'] ?? '',
     );
   }
 

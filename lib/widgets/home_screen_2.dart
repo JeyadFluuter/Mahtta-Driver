@@ -38,8 +38,13 @@ class _HomeScreen2State extends State<HomeScreen2> {
           );
         }),
         Obx(() {
-          final isPending = meController.status.value == "قيد الانتظار";
-          final isActive = statusController.isActivated.value && !isPending;
+          final currentStatus = meController.status.value.trim();
+          final isFullyApproved = (currentStatus == "معتمد" ||
+                  currentStatus.toLowerCase() == "approved" ||
+                  currentStatus.toLowerCase() == "active") &&
+              meController.isApproved.value == true;
+
+          final isActive = statusController.isActivated.value && isFullyApproved;
 
           return isActive
               ? const SizedBox.shrink()
@@ -67,9 +72,14 @@ class _HomeScreen2State extends State<HomeScreen2> {
               alignment: Alignment.topCenter,
               child: Obx(
                 () {
-                  final isPending = meController.status.value == "قيد الانتظار";
-                  final isActive =
-                      statusController.isActivated.value && !isPending;
+                  final currentStatus = meController.status.value.trim();
+                  final isFullyApproved = (currentStatus == "معتمد" ||
+                          currentStatus.toLowerCase() == "approved" ||
+                          currentStatus.toLowerCase() == "active") &&
+                      meController.isApproved.value == true;
+
+                  final isActive = statusController.isActivated.value && isFullyApproved;
+
                   return Padding(
                     padding: const EdgeInsets.all(AppDimensions.paddingSmallX),
                     child: Container(
@@ -101,8 +111,8 @@ class _HomeScreen2State extends State<HomeScreen2> {
                                 ),
                                 Text(
                                   isActive
-                                      ? "أنت الآن في وضع استقبال الطلبات"
-                                      : "أنت غير في وضع عدم إستقبال الطلبات",
+                                      ? "أنت الآن متاح لاستقبال الطلبات"
+                                      : "أنت الآن غير متاح لاستقبال الطلبات",
                                   style: const TextStyle(
                                       color: Colors.white, fontSize: 13),
                                 ),
@@ -110,16 +120,16 @@ class _HomeScreen2State extends State<HomeScreen2> {
                             ),
                             Switch(
                               value: isActive,
-                              onChanged: isPending
-                                  ? null
-                                  : (value) async {
+                              onChanged: isFullyApproved
+                                  ? (value) async {
                                       try {
                                         await statusController
                                             .toggleActivation();
                                       } catch (e) {
                                         debugPrint(e.toString());
                                       }
-                                    },
+                                    }
+                                  : null,
                               activeColor: Colors.white,
                               inactiveThumbColor: Colors.grey,
                             ),

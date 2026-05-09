@@ -1,6 +1,7 @@
 import 'package:piaggio_driver/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:piaggio_driver/constants/app_dimensions.dart';
 import 'package:piaggio_driver/logic/controller/wallet_controller.dart';
 import 'package:piaggio_driver/views/balance_screen.dart';
@@ -39,10 +40,7 @@ class WalletScreen extends StatelessWidget {
           body: SafeArea(
             child: Obx(() {
               if (ctrl.isLoading.value) {
-                return Center(
-                    child: CircularProgressIndicator(
-                  color: AppThemes.primaryNavy,
-                ));
+                return _buildSkeleton();
               }
               if (ctrl.error.isNotEmpty) {
                 return Center(child: Text(ctrl.error.value));
@@ -90,6 +88,60 @@ class WalletScreen extends StatelessWidget {
             }),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSkeleton() {
+    return Padding(
+      padding: const EdgeInsets.all(AppDimensions.paddingMediumX),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Shimmer.fromColors(
+            baseColor: Colors.grey.shade300,
+            highlightColor: Colors.grey.shade100,
+            child: Container(
+              height: 200,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Shimmer.fromColors(
+            baseColor: Colors.grey.shade300,
+            highlightColor: Colors.grey.shade100,
+            child: Container(
+              height: 50,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey.shade300,
+              highlightColor: Colors.grey.shade100,
+              child: ListView.builder(
+                itemCount: 4,
+                itemBuilder: (_, __) => Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

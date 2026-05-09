@@ -8,6 +8,7 @@ class AddBalanceController extends GetxController {
   var isLoading = false.obs;
   var errorMessage = "".obs;
   var successMessage = "".obs;
+  
   final addbalance = GlobalKey<FormState>();
   final AddBalanceServices _addBalance = AddBalanceServices();
   final TextEditingController addBalanceController = TextEditingController();
@@ -28,20 +29,17 @@ class AddBalanceController extends GetxController {
         }
         addBalanceController.clear();
         
-        // Use ONLY message from server for success
-        successMessage(result['message'] ?? "");
+        final msg = result['message'] ?? "تم شحن الرصيد بنجاح";
+        successMessage(msg);
       }
     } catch (e) {
       debugPrint("Caught error in controller: $e");
       try {
         final errorData = jsonDecode(e.toString());
         
-        // Use ONLY 'message' field from server for errors
-        if (errorData['message'] != null) {
-          errorMessage(errorData['message']);
-        } else {
-          errorMessage("حدث خطأ ما، يرجى المحاولة لاحقاً");
-        }
+        // Extract message for 422 or logic errors
+        final msg = errorData['message'] ?? "حدث خطأ ما، يرجى المحاولة لاحقاً";
+        errorMessage(msg);
       } catch (_) {
         errorMessage("فشل الاتصال بالخادم");
       }

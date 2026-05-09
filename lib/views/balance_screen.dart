@@ -1,5 +1,6 @@
 import 'package:piaggio_driver/constants/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:piaggio_driver/constants/app_dimensions.dart';
 import 'package:piaggio_driver/logic/controller/add_balance_controller.dart';
@@ -41,6 +42,9 @@ class BalanceScreen extends StatelessWidget {
                 style: const TextStyle(color: Colors.black),
                 cursorColor: AppThemes.primaryOrange,
                 keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                ],
                 decoration: InputDecoration(
                   focusColor: AppThemes.primaryOrange,
                   hintText: 'XXX-XXXX-XXX',
@@ -97,18 +101,27 @@ class BalanceScreen extends StatelessWidget {
                 : const SizedBox.shrink()),
             const SizedBox(height: AppDimensions.paddingSmall),
             Center(
-              child: Button(
-                name: 'تأكيد',
-                onPressed: () {
-                  controller.addBalance(
-                    code: controller.addBalanceController.text,
+              child: Obx(() {
+                if (controller.isLoading.value) {
+                  return const SizedBox(
+                    height: AppDimensions.buttonHeight,
+                    width: AppDimensions.buttonHeight,
+                    child: CircularProgressIndicator(color: AppThemes.primaryOrange),
                   );
-                },
-                size: Size(
-                  AppDimensions.screenWidth * 0.5,
-                  AppDimensions.buttonHeight,
-                ),
-              ),
+                }
+                return Button(
+                  name: 'تأكيد',
+                  onPressed: () {
+                    controller.addBalance(
+                      code: controller.addBalanceController.text,
+                    );
+                  },
+                  size: Size(
+                    AppDimensions.screenWidth * 0.5,
+                    AppDimensions.buttonHeight,
+                  ),
+                );
+              }),
             ),
             SizedBox(height: MediaQuery.of(context).viewInsets.bottom + 40),
           ],

@@ -14,7 +14,7 @@ class AppInitializer {
 
     await NotificationDelete.notificationDelete();
 
-    await initFCMAndRegisterToken();
+    initFCMAndRegisterToken();
   }
 
   static Future<void> initFCMAndRegisterToken() async {
@@ -32,8 +32,27 @@ class AppInitializer {
       return;
     }
 
-    final token = await messaging.getToken();
-    debugPrint('✅ FCM token: $token');
+    String? token;
+    try {
+      if (!kIsWeb && Platform.isIOS) {
+        // iOS requires APNS token before getting FCM token
+        String? apnsToken = await messaging.getAPNSToken();
+        if (apnsToken == null) {
+          await Future.delayed(const Duration(seconds: 2));
+          apnsToken = await messaging.getAPNSToken();
+        }
+        if (apnsToken != null) {
+          token = await messaging.getToken();
+        } else {
+          debugPrint('⚠️ APNS token not available. Push notifications might not work.');
+        }
+      } else {
+        token = await messaging.getToken();
+      }
+      debugPrint('✅ FCM token: $token');
+    } catch (e) {
+      debugPrint('⚠️ Error getting FCM token: $e');
+    }
 
     if (token == null || token.isEmpty) return;
 

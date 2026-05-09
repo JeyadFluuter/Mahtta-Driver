@@ -27,23 +27,25 @@ class AddBalanceServices {
         ),
       );
 
+      final body = jsonDecode(res.body);
+      
+      // Handle Validation Errors (422) or Logic Errors (200 with error == 1 or status == false)
+      if (res.statusCode == 422 || body['error'] == 1 || body['status'] == false) {
+        debugPrint('❌ API Error (${res.statusCode}) → ${res.body}');
+        throw res.body; // Throw the raw body to let controller parse the 'message'
+      }
+
       if (res.statusCode == 200) {
-        final body = jsonDecode(res.body);
-        // Check for logic error as per backend spec
-        if (body['error'] == 1) {
-          debugPrint('❌ Logic Error (200) → ${res.body}');
-          throw res.body;
-        }
         return {
           'model': AddBalanceModel.fromMap(body),
           'message': body['message'] ?? "تم إضافة الرصيد بنجاح",
         };
       } else {
-        debugPrint('❌  Error ${res.statusCode} → ${res.body}');
+        debugPrint('❌ Unknown Error ${res.statusCode} → ${res.body}');
         throw res.body;
       }
     } catch (e) {
-      debugPrint('❌  Server error: $e');
+      debugPrint('❌ Server error: $e');
       rethrow;
     }
   }

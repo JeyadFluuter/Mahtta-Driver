@@ -13,6 +13,11 @@ class StatusController extends GetxController {
     super.onInit();
     _me = Get.find<MeController>();
     isActivated.value = _stringToBool(_me.isActive.value);
+
+    // Sync with backend updates
+    ever(_me.isActive, (String val) {
+      isActivated.value = _stringToBool(val);
+    });
   }
 
   Future<void> toggleActivation() async {
