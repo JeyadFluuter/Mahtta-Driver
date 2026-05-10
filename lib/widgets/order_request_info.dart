@@ -5,6 +5,7 @@ import 'package:piaggio_driver/constants/app_dimensions.dart';
 import 'package:piaggio_driver/logic/controller/order_accepted_controller.dart';
 import 'package:piaggio_driver/logic/controller/rejection_order_controller.dart';
 import 'package:piaggio_driver/model/order_request_model.dart';
+import 'package:piaggio_driver/constants/api_Url.dart';
 
 class OrderInfoCard extends StatefulWidget {
   final OrderData order;
@@ -171,8 +172,76 @@ class _OrderInfoCardState extends State<OrderInfoCard> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 28),
-
+                  const SizedBox(height: 24),
+ 
+                  // 3.5. Cargo Details
+                  if (widget.order.cargoDesc.isNotEmpty || widget.order.cargoImage.isNotEmpty) ...[
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.grey.shade100),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (widget.order.cargoDesc.isNotEmpty)
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(Icons.description_outlined, size: 18, color: AppThemes.primaryNavy),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    widget.order.cargoDesc,
+                                    style: const TextStyle(fontSize: 13, color: AppThemes.primaryNavy),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          if (widget.order.cargoDesc.isNotEmpty && widget.order.cargoImage.isNotEmpty)
+                            const SizedBox(height: 12),
+                          if (widget.order.cargoImage.isNotEmpty)
+                            GestureDetector(
+                              onTap: () {
+                                final imgUrl = widget.order.cargoImage.startsWith('http') 
+                                  ? widget.order.cargoImage 
+                                  : "$imageUrl${widget.order.cargoImage}";
+                                Get.to(() => Scaffold(
+                                  backgroundColor: Colors.black,
+                                  appBar: AppBar(
+                                    backgroundColor: Colors.black,
+                                    iconTheme: const IconThemeData(color: Colors.white),
+                                    elevation: 0,
+                                  ),
+                                  body: Center(
+                                    child: InteractiveViewer(
+                                      child: Image.network(imgUrl),
+                                    ),
+                                  ),
+                                ));
+                              },
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.network(
+                                  widget.order.cargoImage.startsWith('http') 
+                                    ? widget.order.cargoImage 
+                                    : "$imageUrl${widget.order.cargoImage}",
+                                  width: double.infinity,
+                                  height: 120,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => const SizedBox(),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+ 
                   // 4. Action Buttons (With SafeArea)
                   SafeArea(
                     top: false,

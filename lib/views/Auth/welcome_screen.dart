@@ -26,7 +26,7 @@ class WelcomeScreen extends StatelessWidget {
 
               // ـــ Logo ـــ
               Image.asset(
-                'assets/images/piaggio22.png',
+                'assets/images/Asset 3.png',
                 height: h * 0.22,
                 fit: BoxFit.contain,
               ),

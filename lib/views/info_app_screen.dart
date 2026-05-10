@@ -18,11 +18,13 @@ class InfoApp extends StatelessWidget {
           elevation: 0,
           title: const Text(
             'عن التطبيق',
-            style: TextStyle(color: AppThemes.primaryNavy, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                color: AppThemes.primaryNavy, fontWeight: FontWeight.bold),
           ),
           centerTitle: true,
           leading: IconButton(
-            icon: const Icon(Icons.chevron_left_rounded, color: AppThemes.primaryNavy, size: 30),
+            icon: const Icon(Icons.chevron_left_rounded,
+                color: AppThemes.primaryNavy, size: 30),
             onPressed: () => Navigator.pop(context),
           ),
         ),
@@ -41,7 +43,7 @@ class InfoApp extends StatelessWidget {
                       // shape: BoxShape.circle,
                       ),
                   child: Image.asset(
-                    'assets/images/piaggio.jpg',
+                    'assets/images/Asset 3.png',
                     width: AppDimensions.screenWidth * 0.5,
                   ),
                 ),
@@ -55,9 +57,9 @@ class InfoApp extends StatelessWidget {
                       color: AppThemes.primaryOrange,
                       size: 25,
                     ),
-                     SizedBox(width: AppDimensions.paddingSmall),
-                     Text(
-                      'نبذة عن تطبيق بيادجو (للمستخدمين)',
+                    SizedBox(width: AppDimensions.paddingSmall),
+                    Text(
+                      'نبذة عن تطبيق محطة',
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 16,

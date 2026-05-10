@@ -182,7 +182,7 @@ class _RegistrationStepperState extends State<RegistrationStepper> {
               Padding(
                 padding: const EdgeInsets.only(top: AppDimensions.paddingSmall),
                 child: Image.asset(
-                  'assets/images/piaggio22.png',
+                  'assets/images/Asset 3.png',
                   height: AppDimensions.screenHeight * 0.20,
                   width: AppDimensions.screenWidth,
                 ),

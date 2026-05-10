@@ -35,7 +35,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Image.asset(
-                    'assets/images/piaggio22.png',
+                    'assets/images/Asset 3.png',
                     height: AppDimensions.screenHeight * 0.18,
                     fit: BoxFit.contain,
                   ),

@@ -50,6 +50,8 @@ class Order {
   final double distanceEstimated;
   final String priceEstimated;
   final String shipmentType;
+  final String cargoImage;
+  final String cargoDescription;
 
   Order({
     required this.id,
@@ -62,6 +64,8 @@ class Order {
     required this.distanceEstimated,
     required this.priceEstimated,
     required this.shipmentType,
+    this.cargoImage = '',
+    this.cargoDescription = '',
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
@@ -83,6 +87,8 @@ class Order {
       distanceEstimated: parseDouble(json['distance_estimated']),
       priceEstimated: json['price_estimated']?.toString() ?? '',
       shipmentType: json['shipment_type'] ?? '',
+      cargoImage: json['cargo_image']?.toString() ?? '',
+      cargoDescription: json['cargo_description']?.toString() ?? '',
     );
   }
 }

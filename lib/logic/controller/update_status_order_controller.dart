@@ -53,21 +53,12 @@ class UpdateStatusOrderController extends GetxController {
         if (js['data'] != null) {
           _track.setOrderResponse(OrderResponse.fromJson(js['data']));
         }
-        
-        Get.snackbar('نجاح', 'تم تحديث الحالة بنجاح',
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 4),
-            icon: const Icon(Icons.check));
+        log('✅ تم تحديث الحالة بنجاح');
       } else {
-        Get.snackbar('خطأ', 'فشل تحديث الحالة',
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 4),
-            icon: const Icon(Icons.error));
+        log('❌ فشل تحديث الحالة: ${response.statusCode}');
       }
     } catch (e) {
       log('❌ UpdateStatusOrderController Error: $e');
-      Get.snackbar('خطأ', 'حدث خطأ أثناء الاتصال بالخادم',
-          backgroundColor: Colors.red);
     } finally {
       isLoading.value = false;
     }

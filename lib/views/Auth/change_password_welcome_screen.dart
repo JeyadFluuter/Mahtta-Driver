@@ -36,7 +36,7 @@ class ChangePasswordWelcomeScreen extends StatelessWidget {
                 children: [
                   SizedBox(height: h * 0.02),
                   Image.asset(
-                    'assets/images/piaggio22.png',
+                    'assets/images/Asset 3.png',
                     height: h * 0.18,
                     fit: BoxFit.contain,
                   ),

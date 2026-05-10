@@ -218,7 +218,7 @@ class WalletScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Image.asset(
-                          "assets/images/piaggio22.png",
+                          "assets/images/Asset 3.png",
                           height: 30,
                           color: Colors.white,
                         ),

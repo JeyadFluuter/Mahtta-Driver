@@ -8,6 +8,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:piaggio_driver/routes/routes.dart';
 import 'dart:ui' as ui;
 import 'package:flutter/services.dart';
+import 'package:shimmer/shimmer.dart';
 
 class CustomGoogleMap extends StatefulWidget {
   final LatLng? pickup;
@@ -392,15 +393,81 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
           ),
           if (!_isMapCreated)
             Container(
-              color: isDarkMode ? AppThemes.primaryNavy : Colors.white,
-              child: const Center(
-                child: CircularProgressIndicator(
-                  color: AppThemes.primaryOrange,
-                ),
+              color: isDarkMode ? const Color(0xFF1A1A1A) : Colors.grey[50],
+              child: Stack(
+                children: [
+                  Shimmer.fromColors(
+                    baseColor: isDarkMode ? Colors.grey[900]! : Colors.grey[200]!,
+                    highlightColor: isDarkMode ? Colors.grey[800]! : Colors.grey[100]!,
+                    child: Stack(
+                      children: [
+                        // Mock Roads
+                        for (int i = 0; i < 5; i++)
+                          Positioned(
+                            top: 100.0 * i,
+                            left: 0,
+                            right: 0,
+                            child: Container(height: 20, color: Colors.white),
+                          ),
+                        for (int i = 0; i < 5; i++)
+                          Positioned(
+                            left: 100.0 * i,
+                            top: 0,
+                            bottom: 0,
+                            child: Container(width: 20, color: Colors.white),
+                          ),
+                      ],
+                    ),
+                  ),
+                  Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(15),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.map_rounded,
+                            color: AppThemes.primaryOrange,
+                            size: 40,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        const SizedBox(
+                          width: 40,
+                          height: 40,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3,
+                            valueColor: AlwaysStoppedAnimation<Color>(AppThemes.primaryNavy),
+                          ),
+                        ),
+                        const SizedBox(height: 15),
+                        Text(
+                          "جاري تهيئة الخريطة...",
+                          style: TextStyle(
+                            color: isDarkMode ? Colors.white70 : AppThemes.primaryNavy,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           Positioned(
-            bottom: widget.showEditZone ? 110 + widget.bottomPadding : 30 + widget.bottomPadding,
+            bottom: widget.showEditZone ? 140 + widget.bottomPadding : 65 + widget.bottomPadding,
             right: 16,
             child: FloatingActionButton(
               heroTag: 'focus_driver_loc',

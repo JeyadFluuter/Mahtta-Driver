@@ -82,27 +82,6 @@ class AppInitializer {
         deviceId: deviceId,
       );
     });
-    FirebaseMessaging.onMessage.listen((msg) async {
-      final title = msg.notification?.title ?? 'تنبيه';
-      final body = msg.notification?.body ?? '';
-      final imageUrl =
-          msg.notification?.android?.imageUrl ?? msg.data['image']?.toString();
-
-      if (imageUrl != null && imageUrl.isNotEmpty) {
-        await LocalNotifications.showWithImage(
-          title: title,
-          body: body,
-          imageUrl: imageUrl,
-        );
-      } else {
-        await LocalNotifications.show(title: title, body: body);
-      }
-    });
-
-    FirebaseMessaging.onMessageOpenedApp.listen((msg) {
-      debugPrint('🖱️ onMessageOpenedApp data=${msg.data}');
-    });
-
     final initial = await FirebaseMessaging.instance.getInitialMessage();
     if (initial != null) {
       debugPrint('🚀 getInitialMessage data=${initial.data}');

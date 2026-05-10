@@ -49,7 +49,7 @@ class _LogoAnimation extends StatelessWidget {
         ),
       ),
       child: Image.asset(
-        'assets/images/piaggio22.png',
+        'assets/images/Asset 3.png',
         height: AppDimensions.screenHeight * .18,
       ),
     );
@@ -115,11 +115,14 @@ class _HeadlineWithCurveState extends State<_HeadlineWithCurve>
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Opacity(opacity: w3, child: const Text('أسرع', style: txtStyle)),
+                  Opacity(
+                      opacity: w3, child: const Text('أسرع', style: txtStyle)),
                   const SizedBox(width: 16),
-                  Opacity(opacity: w2, child: const Text('أوفر', style: txtStyle)),
+                  Opacity(
+                      opacity: w2, child: const Text('أوفر', style: txtStyle)),
                   const SizedBox(width: 16),
-                  Opacity(opacity: w1, child: const Text('أسهل', style: txtStyle)),
+                  Opacity(
+                      opacity: w1, child: const Text('أسهل', style: txtStyle)),
                 ],
               ),
               const SizedBox(height: 14),
@@ -139,12 +142,14 @@ class _HeadlineWithCurveState extends State<_HeadlineWithCurve>
                     const Positioned(
                       right: -8,
                       top: 0,
-                      child: Icon(Icons.location_on, color: AppThemes.primaryOrange, size: 22),
+                      child: Icon(Icons.location_on,
+                          color: AppThemes.primaryOrange, size: 22),
                     ),
                     const Positioned(
                       left: -8,
                       top: 0,
-                      child: Icon(Icons.location_on, color: AppThemes.primaryOrange, size: 22),
+                      child: Icon(Icons.location_on,
+                          color: AppThemes.primaryOrange, size: 22),
                     ),
                   ],
                 ),
@@ -181,5 +186,6 @@ class _SmileCurvePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _SmileCurvePainter old) => old.progress != progress;
+  bool shouldRepaint(covariant _SmileCurvePainter old) =>
+      old.progress != progress;
 }

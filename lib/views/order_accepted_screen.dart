@@ -13,9 +13,11 @@ import 'package:piaggio_driver/logic/controller/location_controller.dart';
 import 'package:piaggio_driver/logic/controller/order_request_controller.dart';
 import 'package:piaggio_driver/logic/controller/order_tracking_controller.dart';
 import 'package:piaggio_driver/logic/controller/update_status_order_controller.dart';
+import 'package:piaggio_driver/constants/api_Url.dart';
 import 'package:piaggio_driver/services/order_accepted_services.dart';
 import 'package:piaggio_driver/views/home_screen.dart';
 import 'package:piaggio_driver/widgets/button.dart';
+import 'package:piaggio_driver/views/Customer_services_screen.dart';
 import 'package:get/get.dart';
 
 class OrderAcceptedScreen extends StatefulWidget {
@@ -114,10 +116,7 @@ class _OrderAcceptedScreenState extends State<OrderAcceptedScreen> {
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
-      Get.snackbar("خطأ", "لم يتم العثور على تطبيق لفتح الخريطة",
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 2));
+      log('❌ لم يتم العثور على تطبيق لفتح الخريطة');
     }
   }
 
@@ -133,8 +132,7 @@ class _OrderAcceptedScreenState extends State<OrderAcceptedScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        body: SafeArea(
-          child: Obx(() {
+        body: Obx(() {
             final orderData = trackingCtrl.orderResponse.value;
             if (orderData == null) {
               return Center(
@@ -166,7 +164,7 @@ class _OrderAcceptedScreenState extends State<OrderAcceptedScreen> {
                     return CustomGoogleMap(
                       pickup: fromPoint,
                       dropoff: toPoint,
-                      bottomPadding: sheetHeight - 50, // Closer to the edge
+                      bottomPadding: sheetHeight + 10, // Move logo and focus button above the sheet
                     );
                   },
                 ),
@@ -178,7 +176,7 @@ class _OrderAcceptedScreenState extends State<OrderAcceptedScreen> {
                             MediaQuery.of(context).size.height
                         : MediaQuery.of(context).size.height * 0.40;
                     return Positioned(
-                      bottom: sheetHeight + 10, // Closer distance
+                      bottom: sheetHeight + 10, // Lowered closer to the sheet
                       right: 16,
                       child: FloatingActionButton(
                         backgroundColor: AppThemes.primaryOrange,
@@ -203,6 +201,34 @@ class _OrderAcceptedScreenState extends State<OrderAcceptedScreen> {
                       ),
                     );
                   },
+                ),
+                // ════════════════════════════
+                // CLOSE BUTTON (TOP LEFT)
+                // ════════════════════════════
+                Positioned(
+                  top: 16,
+                  left: 16,
+                  child: SafeArea(
+                    child: GestureDetector(
+                      onTap: () => Get.offAll(() => HomeScreen()),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.15),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(Icons.close_rounded,
+                            color: AppThemes.primaryNavy, size: 22),
+                      ),
+                    ),
+                  ),
                 ),
                 DraggableScrollableSheet(
                   controller: _sheetController,
@@ -289,6 +315,16 @@ class _OrderAcceptedScreenState extends State<OrderAcceptedScreen> {
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      IconButton(
+                                        icon: const Icon(Icons.support_agent,
+                                            color: AppThemes.primaryNavy, size: 28),
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                        onPressed: () {
+                                          Get.to(() => const CustomerServicesScreen());
+                                        },
                                       ),
                                     ],
                                   ),
@@ -455,8 +491,113 @@ class _OrderAcceptedScreenState extends State<OrderAcceptedScreen> {
                                     subtitle: order.toAddress,
                                   ),
                                   const SizedBox(height: 24),
+                                  
+                                  // 5. Cargo Details (New Section)
+                                  if (order.cargoDescription.isNotEmpty || order.cargoImage.isNotEmpty) ...[
+                                    Text(
+                                      'تفاصيل الشحنة',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppThemes.primaryNavy.withOpacity(0.5),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(color: Colors.grey.shade100),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          if (order.cargoDescription.isNotEmpty)
+                                            Row(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                const Icon(Icons.description_outlined, size: 20, color: AppThemes.primaryNavy),
+                                                const SizedBox(width: 12),
+                                                Expanded(
+                                                  child: Text(
+                                                    order.cargoDescription,
+                                                    style: const TextStyle(
+                                                      fontSize: 14,
+                                                      color: AppThemes.primaryNavy,
+                                                      height: 1.4,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          if (order.cargoDescription.isNotEmpty && order.cargoImage.isNotEmpty)
+                                            const SizedBox(height: 16),
+                                          if (order.cargoImage.isNotEmpty)
+                                            GestureDetector(
+                                              onTap: () {
+                                                final imgUrl = order.cargoImage.startsWith('http') 
+                                                  ? order.cargoImage 
+                                                  : "$imageUrl${order.cargoImage}";
+                                                Get.to(() => Scaffold(
+                                                  backgroundColor: Colors.black,
+                                                  appBar: AppBar(
+                                                    backgroundColor: Colors.black,
+                                                    iconTheme: const IconThemeData(color: Colors.white),
+                                                    elevation: 0,
+                                                  ),
+                                                  body: Center(
+                                                    child: InteractiveViewer(
+                                                      child: Image.network(imgUrl),
+                                                    ),
+                                                  ),
+                                                ));
+                                              },
+                                              child: ClipRRect(
+                                                borderRadius: BorderRadius.circular(15),
+                                                child: Image.network(
+                                                  order.cargoImage.startsWith('http') 
+                                                    ? order.cargoImage 
+                                                    : "$imageUrl${order.cargoImage}",
+                                                  width: double.infinity,
+                                                  height: 180,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error, stackTrace) => Container(
+                                                    height: 100,
+                                                    width: double.infinity,
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.grey.shade50,
+                                                      borderRadius: BorderRadius.circular(15),
+                                                    ),
+                                                    child: const Column(
+                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                      children: [
+                                                        Icon(Icons.image_not_supported_outlined, color: Colors.grey),
+                                                        SizedBox(height: 8),
+                                                        Text("فشل تحميل الصورة", style: TextStyle(fontSize: 12, color: Colors.grey)),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  loadingBuilder: (context, child, loadingProgress) {
+                                                    if (loadingProgress == null) return child;
+                                                    return Container(
+                                                      height: 180,
+                                                      width: double.infinity,
+                                                      color: Colors.grey.shade50,
+                                                      child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 24),
+                                  ],
 
-                                  // 5. Financial Details Card (Moved down & Formatted)
+                                  // 6. Financial Details Card (Moved down & Formatted)
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                                     decoration: BoxDecoration(
@@ -507,14 +648,7 @@ class _OrderAcceptedScreenState extends State<OrderAcceptedScreen> {
                                       await Get.find<PusherService>().ensureConnected(forceResubscribe: true);
                                       log('🛑 Status is 6 -> stop location sending');
                                       Get.find<LocationController>().stopLocationTimer();
-                                      Get.snackbar(
-                                        "نجاح العملية",
-                                        "تم إنهاء الطلب بنجاح، سيتم تحويلك إلى الصفحة الرئيسية.",
-                                        snackPosition: SnackPosition.BOTTOM,
-                                        backgroundColor: Colors.green,
-                                        colorText: Colors.white,
-                                        duration: const Duration(seconds: 2),
-                                      );
+                                      log('✅ تم إنهاء الطلب بنجاح');
                                       Future.delayed(const Duration(seconds: 2), () {
                                         Get.offAll(() => HomeScreen());
                                       });
@@ -535,7 +669,6 @@ class _OrderAcceptedScreenState extends State<OrderAcceptedScreen> {
               ],
             );
           }),
-        ),
       ),
     );
   }

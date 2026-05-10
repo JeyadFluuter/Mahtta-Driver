@@ -10,6 +10,7 @@ import 'package:piaggio_driver/logic/controller/order_accepted_controller.dart';
 import 'package:piaggio_driver/logic/controller/order_request_controller.dart';
 import 'package:piaggio_driver/model/order_request_model.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
+import 'package:piaggio_driver/services/local_notifications.dart';
 
 class PusherService extends GetxService with WidgetsBindingObserver {
   final PusherChannelsFlutter _pusher = PusherChannelsFlutter.getInstance();
@@ -150,7 +151,12 @@ class PusherService extends GetxService with WidgetsBindingObserver {
           _orderCtrl.setCurrentOrder(orderData);
           _acceptedCtrl.setOrderId(orderData.id);
 
-          log('📦 طلب جديد #${orderData.id} وصل من Pusher ✅');
+          LocalNotifications.show(
+            title: 'طلب جديد 📦',
+            body: 'لديك طلب توصيل جديد، يرجى الاستجابة بسرعة!',
+          );
+
+          log('📦 طلب جديد #${orderData.id}');
         } catch (err, st) {
           log('❌ JSON parse/handle error: $err\n$st');
         }
@@ -175,6 +181,43 @@ class PusherService extends GetxService with WidgetsBindingObserver {
     _currentChannel = null;
 
     await ensureConnected();
+  }
+
+  Future<void> fetchOrderById(int orderId) async {
+    if (needsAuth) return;
+    
+    try {
+      debugPrint('📡 [PusherService] Fetching order details for #$orderId...');
+      final res = await http.get(
+        Uri.parse('$apiUrl/orders/order/$orderId'),
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+      ).timeout(const Duration(seconds: 10));
+
+      debugPrint('📡 [PusherService] Fetch response status: ${res.statusCode}');
+      if (res.statusCode == 200) {
+        final decoded = jsonDecode(res.body);
+        final dynamic data = decoded['data'];
+        final dynamic orderJsonDyn = (data is Map) ? (data['order'] ?? data) : data;
+        
+        if (orderJsonDyn != null && orderJsonDyn is Map) {
+          final orderJson = Map<String, dynamic>.from(orderJsonDyn);
+          final orderData = OrderData.fromJson(orderJson);
+          
+          _orderCtrl.setCurrentOrder(orderData);
+          _acceptedCtrl.setOrderId(orderData.id);
+          debugPrint('✅ [PusherService] Order details fetched successfully for #$orderId');
+        } else {
+          debugPrint('⚠️ [PusherService] Unexpected data format for #$orderId');
+        }
+      } else {
+        debugPrint('⚠️ [PusherService] Failed to fetch order #$orderId: ${res.statusCode} - ${res.body}');
+      }
+    } catch (e) {
+      debugPrint('❌ [PusherService] Error fetching order #$orderId: $e');
+    }
   }
 
   Future<void> disconnect() async {
