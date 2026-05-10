@@ -13,6 +13,7 @@ import 'package:piaggio_driver/services/order_request_services.dart';
 import 'package:piaggio_driver/views/choose_zoon_maps_screen.dart';
 import 'package:piaggio_driver/views/home_screen.dart';
 import 'package:piaggio_driver/constants/api_Url.dart';
+import 'package:piaggio_driver/constants/appInitializer.dart';
 import 'package:piaggio_driver/routes/routes.dart';
 class AuthController extends GetxController {
   final AuthService _authService = AuthService();
@@ -328,6 +329,10 @@ class AuthController extends GetxController {
         getStorage.write('id', id);
         token = result.data.token;
         getStorage.write('token', token);
+        
+        // ربط توكن الإشعارات فوراً بعد تسجيل الدخول لضمان وصول الإشعارات للمستخدم الجديد
+        await AppInitializer.initFCMAndRegisterToken();
+
         final meCtrl = Get.find<MeController>();
         await meCtrl.refreshMe();
         debugPrint('تم تسجيل الدخول بنجاح: ${meCtrl.firstname.value}');
