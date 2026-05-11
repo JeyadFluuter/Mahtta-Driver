@@ -14,7 +14,7 @@ class LocationController extends GetxController {
   LocationData? currentLoc;
   StreamSubscription<LocationData>? _locationSubscription;
   late OrderAcceptedController _orderAcceptedController;
-  static const int _intervalMs = 5000;
+  static const int _intervalMs = 20000;
   static const double _distanceMeters = 5; // Minimum 5 meters movement
   static const LocationAccuracy _accuracy = LocationAccuracy.high;
   bool _bgConfiguredOnce = false;

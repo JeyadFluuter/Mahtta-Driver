@@ -5,7 +5,6 @@ const String chat = "$baseUrl/api/chat";
 const String chatMessage = "$baseUrl/chat-message";
 const String socketUrl = baseUrl;
 const String pusherAuthBaseUrl = "$baseUrl/api/broadcasting/auth";
-
 // Pusher Credentials
 const String PUSHER_APP_ID = "2141575";
 const String PUSHER_APP_KEY = "953034c02db4be827d44";
