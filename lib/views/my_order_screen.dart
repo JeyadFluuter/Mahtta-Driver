@@ -8,6 +8,8 @@ import 'package:shimmer/shimmer.dart';
 import '../constants/app_dimensions.dart';
 import '../constants/app_theme.dart';
 
+import 'package:piaggio_driver/views/history_order_detail_screen.dart';
+
 class MyOrderScreen extends StatelessWidget {
   MyOrderScreen({super.key});
 
@@ -134,6 +136,8 @@ class MyOrderScreen extends StatelessWidget {
                   !status.contains('إلغاء') &&
                   status != 'قيد الانتظار') {
                 Get.to(() => OrderAcceptedScreen(orderId: order.id!));
+              } else {
+                Get.to(() => HistoryOrderDetailScreen(orderId: order.id!));
               }
             },
             child: Padding(

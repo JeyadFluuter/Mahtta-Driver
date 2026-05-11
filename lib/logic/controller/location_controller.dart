@@ -12,10 +12,10 @@ class LocationController extends GetxController {
   final Location _location = Location();
   final DriverLocationServices _svc = DriverLocationServices();
   LocationData? currentLoc;
-  Timer? _timer;
+  StreamSubscription<LocationData>? _locationSubscription;
   late OrderAcceptedController _orderAcceptedController;
   static const int _intervalMs = 5000;
-  static const double _distanceMeters = 0;
+  static const double _distanceMeters = 5; // Minimum 5 meters movement
   static const LocationAccuracy _accuracy = LocationAccuracy.high;
   bool _bgConfiguredOnce = false;
 
@@ -66,6 +66,14 @@ class LocationController extends GetxController {
     if (!_bgConfiguredOnce) {
       try {
         await _location.enableBackgroundMode(enable: true);
+        if (GetPlatform.isAndroid) {
+          await _location.changeNotificationOptions(
+            title: 'تتبع الموقع نشط',
+            subtitle: 'تطبيق محطة للسائقين يعمل في الخلفية لتتبع مسار الرحلة',
+            iconName: '@mipmap/ic_launcher',
+            onTapBringToFront: true,
+          );
+        }
       } on PlatformException catch (e) {
         debugPrint('⚠️ enableBackgroundMode failed: $e');
         return;
@@ -96,20 +104,22 @@ class LocationController extends GetxController {
 
   double? get lastLat => currentLoc?.latitude;
   double? get lastLng => currentLoc?.longitude;
+
   void startLocationTimer() async {
-    if (_timer != null) return;
+    if (_locationSubscription != null) return;
     await _prepareLocation();
-    _timer = Timer.periodic(const Duration(seconds: 5), (_) async {
+
+    _locationSubscription = _location.onLocationChanged.listen((loc) async {
       try {
-        final loc = await _location.getLocation();
         currentLoc = loc;
         update();
-        debugPrint('🔄 Location: ${loc.latitude}, ${loc.longitude}');
+        debugPrint('🔄 Location (Stream): ${loc.latitude}, ${loc.longitude}');
 
         if (_orderAcceptedController.orderId <= 0) {
           debugPrint('⚠️ تخطي إرسال الموقع: رقم الطلب غير محدد (0)');
           return;
         }
+
         if (loc.latitude != null && loc.longitude != null) {
           final result = await _svc.driverLocation(
             currentLat: loc.latitude!,
@@ -117,23 +127,21 @@ class LocationController extends GetxController {
             orderId: _orderAcceptedController.orderId,
           );
           if (result != null) {
-            debugPrint(
-                '✅ تم تحديث الموقع بنجاح على الخادم: ${loc.latitude}, ${loc.longitude}');
-          } else {
-            debugPrint('❌ تحديث تلقائي فشل (result == null)');
+            debugPrint('✅ تم تحديث الموقع بنجاح على الخادم: ${loc.latitude}, ${loc.longitude}');
           }
         }
       } catch (e) {
-        debugPrint('❌ خطأ أثناء التحديث التلقائي: $e');
+        debugPrint('❌ خطأ أثناء تحديث الموقع من الـ Stream: $e');
       }
     });
-    debugPrint('✅ بدأ التتبع بالتكرار كل 5 ثوانٍ (Timer)');
+
+    debugPrint('✅ بدأ تتبع الموقع بنظام الـ Stream (Background Ready)');
   }
 
   void stopLocationTimer() {
-    _timer?.cancel();
-    _timer = null;
-    debugPrint('🛑 تم إيقاف تتبع الموقع');
+    _locationSubscription?.cancel();
+    _locationSubscription = null;
+    debugPrint('🛑 تم إيقاف تتبع الموقع (Stream cancelled)');
   }
 
   @override

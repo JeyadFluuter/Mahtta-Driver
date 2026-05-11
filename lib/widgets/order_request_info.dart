@@ -266,30 +266,42 @@ class _OrderInfoCardState extends State<OrderInfoCard> {
                         Expanded(
                           child: GestureDetector(
                             onTap: () => acceptedCtrl.orderAccepted(),
-                            child: Container(
-                              height: 58,
-                              decoration: BoxDecoration(
-                                color: AppThemes.primaryNavy,
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppThemes.primaryNavy.withOpacity(0.3),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 6),
-                                  ),
-                                ],
-                              ),
-                              child: const Center(
-                                child: Text(
-                                  'قبول الطلب',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                            child: Obx(() {
+                              final bool loading = acceptedCtrl.isLoading.value;
+                              return Container(
+                                height: 58,
+                                decoration: BoxDecoration(
+                                  color: loading ? AppThemes.primaryNavy.withOpacity(0.6) : AppThemes.primaryNavy,
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: loading ? [] : [
+                                    BoxShadow(
+                                      color: AppThemes.primaryNavy.withOpacity(0.3),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 6),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ),
+                                child: Center(
+                                  child: loading
+                                      ? const SizedBox(
+                                          height: 24,
+                                          width: 24,
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeWidth: 2.5,
+                                          ),
+                                        )
+                                      : const Text(
+                                          'قبول الطلب',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                ),
+                              );
+                            }),
                           ),
                         ),
                       ],

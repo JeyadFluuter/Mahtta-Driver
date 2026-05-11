@@ -26,6 +26,25 @@ class OrderAcceptedServices {
   bool _subscribed = false;
   bool initialised = false;
 
+  Future<Map<String, dynamic>?> getOrderDetails(int orderId) async {
+    final token = GetStorage().read('token');
+    try {
+      final res = await http.get(
+        Uri.parse('$apiUrl/orders/order/$orderId'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+      if (res.statusCode == 200) {
+        return jsonDecode(res.body)['data'];
+      }
+    } catch (e) {
+      log('❌ getOrderDetails error: $e');
+    }
+    return null;
+  }
+
   Future<void> init([int? orderId]) async {
     try {
       _driverId ??= int.tryParse(_meCtrl.id.value);

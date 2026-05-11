@@ -15,6 +15,7 @@ import 'package:piaggio_driver/logic/controller/wallet_controller.dart';
 import 'package:piaggio_driver/logic/controller/rejection_order_controller.dart';
 
 class OrderAcceptedController extends GetxController {
+  final RxBool isLoading = false.obs;
   final RxInt _orderId = 0.obs;
   int get orderId => _orderId.value;
 
@@ -22,23 +23,23 @@ class OrderAcceptedController extends GetxController {
   void rejectCurrentOrder() => _orderId.value = 0;
 
   Future<void> orderAccepted() async {
+    if (isLoading.value) return;
     debugPrint("🚀 orderAccepted() START orderId=$orderId");
 
     if (orderId == 0) {
-      Get.snackbar("خطأ", "رقم الطلب غير موجود");
+      Get.snackbar("تنبيه", "رقم الطلب غير صالح", backgroundColor: Colors.orange, colorText: Colors.white);
       return;
     }
 
     try {
-      // 1. Check wallet balance vs commission
+      isLoading.value = true;
+
+      // 1. Force refresh wallet balance for accurate check
       final walletCtrl = Get.isRegistered<WalletController>()
           ? Get.find<WalletController>()
           : Get.put(WalletController());
-
-      // Ensure wallet data is fetched
-      if (walletCtrl.wallet.value == null) {
-        await walletCtrl.fetchData();
-      }
+      
+      await walletCtrl.fetchData();
 
       final orderCtrl = Get.isRegistered<OrderController>()
           ? Get.find<OrderController>()
@@ -48,97 +49,16 @@ class OrderAcceptedController extends GetxController {
 
       if (currentOrder != null && currentOrder.id == orderId) {
         double commission = double.tryParse(currentOrder.commissionLyd) ?? 0.0;
-        double balance =
-            double.tryParse(walletCtrl.wallet.value?.balance ?? "0") ?? 0.0;
+        double balance = double.tryParse(walletCtrl.wallet.value?.balance ?? "0") ?? 0.0;
 
         if (commission > balance) {
-          // Reject order so it disappears from UI
-          final rejectCtrl = Get.isRegistered<RejectionOrderController>()
-              ? Get.find<RejectionOrderController>()
-              : Get.put(RejectionOrderController());
-          rejectCtrl.rejectOrder(orderId: orderId);
-
-          Get.dialog(
-            Dialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24)),
-              elevation: 0,
-              backgroundColor: Colors.transparent,
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: const [
-                    BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 10.0,
-                        offset: Offset(0.0, 10.0)),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppThemes.primaryOrange.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.account_balance_wallet_rounded,
-                          color: AppThemes.primaryOrange, size: 40),
-                    ),
-                    const SizedBox(height: 24),
-                    const Text(
-                      "رصيدك غير كافي",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppThemes.primaryNavy,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      "لا يمكنك قبول هذا الطلب لأن عمولته ($commission د.ل) أكبر من رصيدك الحالي ($balance د.ل).",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: AppThemes.primaryNavy.withOpacity(0.7),
-                        fontSize: 14,
-                        height: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    SizedBox(
-                      width: double.infinity,
-                      child: Builder(builder: (context) {
-                        return ElevatedButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppThemes.primaryNavy,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16)),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            elevation: 0,
-                          ),
-                          child: const Text(
-                            "موافق",
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                        );
-                      }),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
+          // Logic for insufficient balance (already implemented dialog)
+          _showInsufficientBalanceDialog(commission, balance);
           return;
         }
       }
 
+      // 2. Ensure Location is ready
       final locCtrl = Get.isRegistered<LocationController>()
           ? Get.find<LocationController>()
           : Get.put(LocationController(), permanent: true);
@@ -148,27 +68,17 @@ class OrderAcceptedController extends GetxController {
       final double? lng = loc?.longitude ?? locCtrl.lastLng;
 
       if (lat == null || lng == null) {
-        Get.snackbar(
-          "تنبيه",
-          "تعذر تحديد موقعك الحالي. جرّب تفعيل GPS ثم أعد المحاولة.",
-        );
+        Get.snackbar("تنبيه", "يجب تفعيل الـ GPS لتتمكن من قبول الطلب", backgroundColor: Colors.red, colorText: Colors.white);
         return;
       }
 
-      final data = <String, dynamic>{
+      final data = {
         'order_id': orderId,
         'current_lat': lat,
         'current_lng': lng,
       };
 
       final token = GetStorage().read<String>('token') ?? '';
-      if (token.isEmpty) {
-        Get.snackbar("خطأ", "التوكن غير موجود، سجل دخول من جديد");
-        return;
-      }
-      debugPrint(
-          "✅ Accepting orderId=$orderId lat=$lat lng=$lng token=$token ");
-
       final response = await http.post(
         Uri.parse('$apiUrl/orders/accept-order'),
         headers: {
@@ -178,43 +88,69 @@ class OrderAcceptedController extends GetxController {
         },
         body: json.encode(data),
       );
-      debugPrint(
-          "❌ accept status=${response.statusCode} body=${response.body}");
 
       if (response.statusCode == 200) {
-        Get.snackbar(
-          "نجاح",
-          "تم قبول الطلب بنجاح",
-          backgroundColor: Colors.green,
-          duration: const Duration(seconds: 4),
-          icon: const Icon(Icons.check),
-        );
-
+        // Clear current offer
         try {
-          final orderCtrl = Get.isRegistered<OrderController>()
-              ? Get.find<OrderController>()
-              : null;
-          orderCtrl?.clearCurrentOrder();
-        } catch (_) {}
-
-        try {
+          final orderCtrl = Get.find<OrderController>();
+          orderCtrl.clearCurrentOrder();
           GetStorage().remove('latest_order_id');
         } catch (_) {}
 
+        // Initialize tracking screen services
         await OrderAcceptedServices().init(orderId);
+        
+        // START LOCATION TRACKING IMMEDIATELY
+        locCtrl.startLocationTimer();
+
         Get.offAll(() => OrderAcceptedScreen(orderId: orderId));
       } else {
-        Get.snackbar(
-          "فشل",
-          "لم يتم قبول الطلب",
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 4),
-          icon: const Icon(Icons.error),
-        );
+        final errorMsg = json.decode(response.body)['message'] ?? "لم يتم قبول الطلب من السيرفر";
+        Get.snackbar("فشل العملية", errorMsg, backgroundColor: Colors.red, colorText: Colors.white);
       }
     } catch (e) {
-      Get.snackbar("خطأ", "حدث خطأ أثناء إرسال الطلب");
       debugPrint('❌ orderAccepted error: $e');
+      Get.snackbar("خطأ", "حدث خطأ غير متوقع، يرجى المحاولة لاحقاً", backgroundColor: Colors.red, colorText: Colors.white);
+    } finally {
+      isLoading.value = false;
     }
+  }
+
+  void _showInsufficientBalanceDialog(double commission, double balance) {
+    // Moved the complex dialog logic here to keep orderAccepted clean
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(color: AppThemes.primaryOrange.withOpacity(0.1), shape: BoxShape.circle),
+                child: const Icon(Icons.account_balance_wallet_rounded, color: AppThemes.primaryOrange, size: 40),
+              ),
+              const SizedBox(height: 24),
+              const Text("رصيدك غير كافي", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppThemes.primaryNavy)),
+              const SizedBox(height: 16),
+              Text("لا يمكنك قبول هذا الطلب لأن عمولته ($commission د.ل) أكبر من رصيدك الحالي ($balance د.ل).",
+                  textAlign: TextAlign.center, style: TextStyle(color: AppThemes.primaryNavy.withOpacity(0.7), fontSize: 14, height: 1.5)),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Get.back(),
+                  style: ElevatedButton.styleFrom(backgroundColor: AppThemes.primaryNavy, foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), padding: const EdgeInsets.symmetric(vertical: 16)),
+                  child: const Text("موافق", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
